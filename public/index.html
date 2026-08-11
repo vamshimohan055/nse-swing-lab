@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NSE Swing Lab — Walk-Forward Backtester</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #121a2f;
+    --panel-2: #1a2440;
+    --accent: #ff8a00;
+    --accent-2: #ffd166;
+    --text: #e8ecf3;
+    --muted: #8a93a6;
+    --green: #2dd4bf;
+    --red: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #1c2547 0%, transparent 60%),
+                radial-gradient(1000px 500px at 110% 110%, #2a1d4a 0%, transparent 60%),
+                var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 96px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center; font-weight: 800; color: #1a1300;
+  }
+  .brand h1 { margin: 0; font-size: 22px; letter-spacing: 0.3px; }
+  .brand p { margin: 0; color: var(--muted); font-size: 13px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px; font-size: 12px;
+    background: rgba(45, 212, 191, 0.12); color: var(--green);
+    border: 1px solid rgba(45, 212, 191, 0.3);
+  }
+  .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .hero {
+    background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    border: 1px solid #233056; border-radius: 18px; padding: 36px; margin-bottom: 28px;
+  }
+  .hero h2 { font-size: 34px; margin: 0 0 12px; }
+  .hero p.lead { color: var(--muted); font-size: 16px; margin: 0 0 18px; max-width: 720px; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 12px 18px; border-radius: 10px; font-weight: 600; text-decoration: none;
+    transition: transform 0.06s ease, box-shadow 0.2s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #1a1300; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid #2b3a63; }
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid #233056; border-radius: 14px; padding: 20px; }
+  .card h3 { margin: 0 0 8px; font-size: 16px; color: var(--accent-2); }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .span-4 { grid-column: span 4; }
+  .span-6 { grid-column: span 6; }
+  .span-12 { grid-column: span 12; }
+  .stat { display: flex; align-items: baseline; gap: 8px; }
+  .stat .v { font-size: 28px; font-weight: 700; }
+  .stat .l { color: var(--muted); font-size: 13px; }
+  .stat.up .v { color: var(--green); }
+  .stat.down .v { color: var(--red); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px;
+    background: #1f2a4a; color: var(--muted); margin-left: 8px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #1f2a4a; }
+  th { color: var(--muted); font-weight: 500; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  footer { margin-top: 36px; color: var(--muted); font-size: 13px; text-align: center; }
+  code { background: #0f1730; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+  @media (max-width: 800px) {
+    .span-4, .span-6 { grid-column: span 12; }
+    .hero h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">NS</div>
+        <div>
+          <h1>NSE Swing Lab</h1>
+          <p>Walk-forward backtester · Nifty 200 · 2y window · ≤10 positions</p>
+        </div>
+      </div>
+      <span class="pill">Mock data · prototype</span>
+    </header>
+
+    <section class="hero">
+      <h2>Eight swing strategies, one ranked leaderboard.</h2>
+      <p class="lead">
+        Indian-cost-aware backtests with ATR stops, 2xATR targets, 15-day time stops, sector caps,
+        and a regime filter (realized vol, ADX, dispersion). Run it locally to see live
+        dropdowns, equity curves, and per-strategy trade lists.
+      </p>
+      <div class="ctas">
+        <a class="btn primary" href="https://github.com/" target="_blank" rel="noopener">View source</a>
+        <a class="btn ghost" href="#strategies">See strategies</a>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div class="card span-4">
+        <h3>Universe</h3>
+        <p>Nifty 200 constituents <span class="badge">280 symbols</span></p>
+        <p class="stat"><span class="v">17</span><span class="l">sector tags</span></p>
+      </div>
+      <div class="card span-4">
+        <h3>Cost model</h3>
+        <p>Brokerage + STT + exchange/SEBI/GST + stamp + slippage</p>
+        <p class="stat"><span class="v">~0.13%</span><span class="l">round-trip</span></p>
+      </div>
+      <div class="card span-4">
+        <h3>Risk</h3>
+        <p>Equal-weight slot sizing · max 10 positions · ≤3 per sector</p>
+        <p class="stat"><span class="v">2×ATR</span><span class="l">stop / 4×ATR target</span></p>
+      </div>
+
+      <div class="card span-12" id="strategies">
+        <h3>Strategy suite</h3>
+        <p style="margin-bottom: 14px;">Mean-reversion, breakout, sector rotation, and pairs-relative — evaluated on Sharpe, Sortino, Calmar, max drawdown, and win rate.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Family</th>
+              <th>Signal</th>
+              <th>Holding</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>RSI-2 Mean Reversion</td><td>Mean reversion</td><td>2-period RSI oversold</td><td>1–15d</td></tr>
+            <tr><td>Bollinger Fade</td><td>Mean reversion</td><td>Lower-band touch</td><td>1–15d</td></tr>
+            <tr><td>Z-Score</td><td>Mean reversion</td><td>20d z &lt; -1.5</td><td>1–15d</td></tr>
+            <tr><td>Sector Rotation</td><td>Momentum</td><td>Top-3 sectors by 60d return</td><td>1–15d</td></tr>
+            <tr><td>Vol-Adaptive</td><td>Mixed</td><td>Scaled by realized vol</td><td>1–15d</td></tr>
+            <tr><td>Squeeze Breakout</td><td>Breakout</td><td>Bollinger-inside-Keltner</td><td>1–15d</td></tr>
+            <tr><td>Pairs-Relative</td><td>Relative value</td><td>Top-10 by 60d return basket</td><td>1–15d</td></tr>
+            <tr><td>Momentum</td><td>Momentum</td><td>Donchian + ROC confirm</td><td>1–15d</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card span-6">
+        <h3>Regime filter</h3>
+        <p>Pipeline tags the market on a 60d rolling window:</p>
+        <ul style="margin: 8px 0 0 18px; color: var(--muted);">
+          <li>Realized volatility (annualized)</li>
+          <li>Average Directional Index (ADX)</li>
+          <li>Cross-sectional dispersion</li>
+          <li>Index drawdown from rolling peak</li>
+        </ul>
+      </div>
+      <div class="card span-6">
+        <h3>How to run</h3>
+        <p>This deployment is a static landing page. The interactive app runs locally:</p>
+        <pre style="background:#0f1730;padding:12px;border-radius:8px;overflow:auto;font-size:12px;color:var(--text);"><code>git clone &lt;repo&gt;
+cd nse-swing-lab
+pip install -e .
+streamlit run src/nse_swing_lab/app.py</code></pre>
+      </div>
+
+      <div class="card span-12">
+        <h3>Caveats</h3>
+        <p>Mock OHLCV with sector-correlated GBM and regime shifts is used in the absence of Dhan credentials.
+        Survivorship bias applies: today's Nifty 200 is the universe, not point-in-time. Sharpe &gt; 1.5 is the stretch target; 1.0–1.5 is acceptable. Max drawdown target &lt; 20%.</p>
+      </div>
+    </div>
+
+    <footer>
+      NSE Swing Lab · prototype · not investment advice
+    </footer>
+  </div>
+</body>
+</html>

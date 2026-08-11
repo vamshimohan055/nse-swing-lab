@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution
+build/
+dist/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project secrets / env
+.env
+.env.local
+.env.*.local
+
+# Data cache (may contain real responses if DHAN creds ever added)
+data/cache/
+data/raw/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Wrangler / Cloudflare state
+.wrangler/
+.dev.vars
+
+# Kilo internal
+.kilo/

@@ -1,0 +1,21 @@
+[project]
+name = "nse-swing-lab"
+version = "0.1.0"
+description = "Systematic swing-trading research platform for NSE equities (Nifty 200)."
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+    "streamlit>=1.35",
+    "plotly>=5.20",
+    "pyarrow>=15",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.ruff]
+line-length = 100
